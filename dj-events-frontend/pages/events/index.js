@@ -1,11 +1,12 @@
 import React from 'react'
+import { Layout } from '../components/Layout'
 
-const EventPage = () => {
+const EventsPage = () => {
   return (
-    <div>
+    <Layout title={"EVents PAge"}>
       <h3>My Events</h3>
-    </div>
+    </Layout>
   )
 }
 
-export default EventPage
+export default EventsPage

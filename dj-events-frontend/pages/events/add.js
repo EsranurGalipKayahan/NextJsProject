@@ -1,11 +1,12 @@
 import React from 'react'
+import { Layout } from '../components/Layout'
 
-const AddEvetPage = () => {
+const AddEventPage = () => {
   return (
-    <div>
+    <Layout title={"Add New Event"}>
       <h1>Add Event PAge</h1>
-    </div>
+    </Layout>
   )
 }
 
-export default AddEvetPage
+export default AddEventPage
