@@ -1,5 +1,5 @@
-import React from 'react'
-import { Layout } from './components/Layout'
+import React from "react";
+import { Layout } from "../components/Layout";
 
 const about = () => {
   return (
@@ -8,7 +8,7 @@ const about = () => {
       <p>This is an app to find the latest DJ and other musical events</p>
       <p>version 1.0.0</p>
     </Layout>
-  )
-}
+  );
+};
 
-export default about
+export default about;
