@@ -11,8 +11,9 @@ import Image from "next/image";
 import { FaImage } from "react-icons/fa";
 import Modal from "@/components/Modal";
 import ImageUpload from "@/components/ImageUpload";
+import { parseCookies } from "helpers";
 
-const EditEventPage = ({ evt }) => {
+const EditEventPage = ({ evt, token }) => {
   const router = useRouter();
   const [values, setValues] = useState({
     name: evt.attributes.name,
@@ -25,7 +26,7 @@ const EditEventPage = ({ evt }) => {
   });
 
   const [imagePreview, setImagePreview] = useState(
-    evt.attributes.image
+    evt.attributes?.image?.data
       ? evt.attributes.image.data.attributes.formats.thumbnail.url
       : null
   );
@@ -39,21 +40,34 @@ const EditEventPage = ({ evt }) => {
     if (hasEmptyFields) {
       toast.error("Please fill in all fields");
     }
-    const newValues = { ...values, slug: values.name };
+
+    const newValues = {
+      data: {
+        ...values,
+        slug: evt?.attributes?.slug
+          ? evt.attributes.slug
+          : values.name.charAt(0).toLowerCase() + values.name.slice(1),
+      },
+    };
 
     const res = await fetch(`${API_URL}/api/eventss/${evt.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(newValues),
     });
 
     if (!res.ok) {
+      if (res.status === 403 || res.status === 401) {
+        toast.error("Unauthorized");
+        return;
+      }
       toast.error("Something went wrong");
     } else {
       const evt = await res.json();
-      router.push(`/events/${evt.slug}`);
+      router.push(`/events/${evt.data.attributes.slug}`);
     }
   };
   const handleInputChange = (e) => {
@@ -78,7 +92,7 @@ const EditEventPage = ({ evt }) => {
       <Link href={"/events"}>
         <a>Go Back</a>
       </Link>
-      <h1>Add Event</h1>
+      <h1>Edit Event</h1>
       <ToastContainer />
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.grid}>
@@ -154,7 +168,7 @@ const EditEventPage = ({ evt }) => {
             onChange={handleInputChange}></textarea>
         </div>
 
-        <input type="submit" value="Add Event" className="btn" />
+        <input type="submit" value="Edit Event" className="btn" />
       </form>
       <h2>Event Image</h2>
       {imagePreview ? (
@@ -170,13 +184,18 @@ const EditEventPage = ({ evt }) => {
         </button>
       </div>
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <ImageUpload evtId={evt.id} imageUploaded={imageUploaded} />
+        <ImageUpload
+          evtId={evt.id}
+          imageUploaded={imageUploaded}
+          token={token}
+        />
       </Modal>
     </Layout>
   );
 };
 
 export async function getServerSideProps({ params: { id }, req }) {
+  const { token } = parseCookies(req);
   const res = await fetch(`${API_URL}/api/eventss?populate=image`);
   const events = await res.json();
 
@@ -185,6 +204,7 @@ export async function getServerSideProps({ params: { id }, req }) {
   return {
     props: {
       evt: events.data.find((d) => d.id == id),
+      token,
     },
   };
 }

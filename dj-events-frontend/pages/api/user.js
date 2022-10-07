@@ -8,13 +8,13 @@ export default async (req, res) => {
       return;
     }
     const { token } = cookie.parse(req.headers.cookie);
-    const strapiREs = await fetch(`${API_URL}/users/me`, {
+    const strapiREs = await fetch(`${API_URL}/api/users/me`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log("Cookie check", strapiREs);
+    //  console.log("Cookie check", strapiREs);
     const user = await strapiREs.json();
     if (strapiREs.ok) {
       res.status(200).json({ user });

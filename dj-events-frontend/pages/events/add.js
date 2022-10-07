@@ -6,8 +6,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Layout } from "@/components/Layout";
 import { API_URL } from "@/config/index";
+import { parseCookies } from "helpers";
 
-const AddEventPage = () => {
+const AddEventPage = ({ token }) => {
   const router = useRouter();
   const [values, setValues] = useState({
     name: "",
@@ -38,6 +39,7 @@ const AddEventPage = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(newValues),
     });
@@ -46,7 +48,7 @@ const AddEventPage = () => {
       toast.error("Something went wrong");
     } else {
       const evt = await res.json();
-      router.push(`/events/${evt.slug}`);
+      router.push(`/events/${evt.data.attributes.slug}`);
     }
   };
   const handleInputChange = (e) => {
@@ -141,4 +143,11 @@ const AddEventPage = () => {
   );
 };
 
+export async function getServerSideProps({ req }) {
+  const { token } = parseCookies(req);
+
+  return {
+    props: { token },
+  };
+}
 export default AddEventPage;
